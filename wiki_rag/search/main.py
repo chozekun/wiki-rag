@@ -138,6 +138,11 @@ async def run():
         user_agent = "Moodle Research Crawler/{version} (https://git.in.moodle.com/research)"
     user_agent = f"{user_agent.format(version=__version__)}"
 
+    embedding_base_url = os.getenv("EMBEDDING_BASE_URL")
+    if not embedding_base_url:
+        logger.error("Embedding base URL not found in environment. Exiting.")
+        sys.exit(1)
+
     embedding_model = os.getenv("EMBEDDING_MODEL")
     if not embedding_model:
         logger.error("Embedding model not found in environment. Exiting.")
@@ -180,6 +185,7 @@ async def run():
         kb_name="Moodle Docs",
         kb_url=mediawiki_url,
         collection_name=collection_name,
+        embedding_base_url=embedding_base_url,
         embedding_model=embedding_model,
         embedding_dimension=embedding_dimensions,
         llm_model=llm_model,

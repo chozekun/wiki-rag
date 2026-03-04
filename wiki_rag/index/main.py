@@ -82,6 +82,11 @@ def main():
         user_agent = "Moodle Research Crawler/{version} (https://git.in.moodle.com/research)"
     user_agent = f"{user_agent.format(version=__version__)}"
 
+    embedding_base_url = os.getenv("EMBEDDING_BASE_URL")
+    if not embedding_base_url:
+        logger.error("Embedding base URL not found in environment. Exiting.")
+        sys.exit(1)
+
     embedding_model = os.getenv("EMBEDDING_MODEL")
     if not embedding_model:
         logger.error("Embedding model not found in environment. Exiting.")
@@ -122,7 +127,7 @@ def main():
     logger.info(f'Collection "{temp_collection_name}" created.')
 
     logger.info(f'Indexing pages into temp collection "{temp_collection_name}"')
-    [total_pages, total_sections] = index_pages(pages, temp_collection_name, embedding_model, embedding_dimensions)
+    [total_pages, total_sections] = index_pages(pages, temp_collection_name, embedding_base_url, embedding_model, embedding_dimensions)
     logger.info(f"Indexed {total_pages} pages ({total_sections} sections/chunks).")
 
     logger.info(f'Replacing previous collection "{collection_name}" with new collection "{temp_collection_name}"')

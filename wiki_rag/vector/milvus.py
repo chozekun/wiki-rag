@@ -138,6 +138,7 @@ class MilvusVector(BaseVector):
 
     def retrieve(self,
             collection_name: str,
+            embedding_base_url: str,
             embedding_model: str,
             embedding_dimensions: int,
             query: str,
@@ -154,6 +155,7 @@ class MilvusVector(BaseVector):
         """
         # Get the embeddings to look for in the dense search.
         embeddings = self._get_query_embeddings(
+            embedding_base_url=embedding_base_url,
             embedding_model=embedding_model,
             embedding_dimensions=embedding_dimensions,
             query=query,

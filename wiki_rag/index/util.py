@@ -70,6 +70,7 @@ def create_temp_collection_schema(collection_name: str, embedding_dimension: int
 def index_pages(
         pages: list[dict],
         collection_name: str,
+        embedding_base_url: str,
         embedding_model: str,
         embedding_dimension: int
 ) -> list[int]:
@@ -77,6 +78,7 @@ def index_pages(
     logging.getLogger("httpx").setLevel(logging.WARNING)  # Don't log (INFO) all http requests.
 
     embeddings = OpenAIEmbeddings(
+        base_url=embedding_base_url,
         model=embedding_model,
         dimensions=embedding_dimension,
         check_embedding_ctx_length=False,

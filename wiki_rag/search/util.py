@@ -46,6 +46,7 @@ class ContextSchema(TypedDict):
     kb_name: str
     kb_url: str
     collection_name: str
+    embedding_base_url: str
     embedding_model: str
     embedding_dimension: int
     llm_model: str
@@ -348,6 +349,7 @@ async def retrieve(state: RagState, runtime: Runtime[ContextSchema]) -> dict:
     """Retrieve the best matches from the indexed database."""
     results = vector.store.retrieve(
         collection_name=runtime.context["collection_name"],
+        embedding_base_url=runtime.context["embedding_base_url"],
         embedding_model=runtime.context["embedding_model"],
         embedding_dimensions=runtime.context["embedding_dimension"],
         query=state["question"],

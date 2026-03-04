@@ -19,6 +19,7 @@ LOADER_DUMP_PATH=
 # Milvus connection URL.
 MILVUS_URL="http://0.0.0.0:19530"
 
+EMBEDDING_BASE_URL="https://openai.com/v1"
 EMBEDDING_MODEL="your_embedding_model"
 # Specify the default real embedding dims used. Some providers don't allow to change this.
 EMBEDDING_DIMENSIONS=768

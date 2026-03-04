@@ -63,6 +63,7 @@ class BaseVector(ABC):
     @abstractmethod
     def retrieve(self,
         collection_name: str,
+        embedding_base_url: str,
         embedding_model: str,
         embedding_dimensions: int,
         query: str,
@@ -129,6 +130,7 @@ class BaseVector(ABC):
         """
 
     def _get_query_embeddings(self,
+        embedding_base_url: str,
         embedding_model: str,
         embedding_dimensions: int,
         query: str,
@@ -153,6 +155,7 @@ class BaseVector(ABC):
 
         """
         embeddings = OpenAIEmbeddings(
+            base_url=embedding_base_url,
             model=embedding_model,
             dimensions=embedding_dimensions,
             check_embedding_ctx_length=False,
