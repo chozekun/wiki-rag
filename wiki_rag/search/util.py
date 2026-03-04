@@ -8,6 +8,7 @@ import os
 import pprint
 
 from typing import Annotated, Literal, TypedDict
+from urllib.parse import urlparse
 
 from cachetools import TTLCache, cached
 from langchain_core.messages import BaseMessage
@@ -425,13 +426,14 @@ async def optimise(state: RagState, runtime: Runtime[ContextSchema]) -> dict:
         retrieved_docs=state["vector_search"],
         sorted_items=sorted_items,
         collection_name=runtime.context["collection_name"],
+        kb_url=runtime.context["kb_url"],
         top=top
     )
 
     return {"context": new_context, "sources": new_sources}
 
 
-def build_poc_context(retrieved_docs, sorted_items, collection_name: str, top=5) -> list[list[str]]:
+def build_poc_context(retrieved_docs, sorted_items, collection_name: str, kb_url: str = None, top=5) -> list[list[str]]:
     """Given the originally retrieved docs and the sorted, weighted items, build the rag final context.
 
     POC: Build the new context by using Parent, Own and Children elements.
@@ -456,7 +458,28 @@ def build_poc_context(retrieved_docs, sorted_items, collection_name: str, top=5)
                 link = ""
                 if element["entity"]["parent"]:
                     link = f"{element['entity']['doc_title']}: "
-                link = f"[{element['entity']['source']}|{link}{element['entity']['title']}]"
+
+                # If we have a kb_url, let's use it to build the source link.
+                # This is useful when the index was built with a different URL (like a temp one).
+                source_url = element["entity"]["source"]
+                if kb_url:
+                    # If we have a custom replacement URL (env var), use it.
+                    old_url = os.getenv("MEDIAWIKI_URL_OLD")
+                    if old_url and source_url.startswith(old_url):
+                        source_url = source_url.replace(old_url, kb_url)
+                    else:
+                        # Fallback: if they differ, try to replace the base part of the URL.
+                        # This assumes the source_url is an absolute URL and kb_url is the new base.
+                        source_parsed = urlparse(source_url)
+                        kb_parsed = urlparse(kb_url)
+                        if source_parsed.netloc != kb_parsed.netloc:
+                            # Reconstruct using kb_url's scheme and netloc, but source_url's path/query/fragment.
+                            source_url = source_parsed._replace(
+                                scheme=kb_parsed.scheme,
+                                netloc=kb_parsed.netloc
+                            ).geturl()
+
+                link = f"[{source_url}|{link}{element['entity']['title']}]"
                 sources_list.append(link)
             # If the element has children, let's find them and add them to the context list (if not added already).
             if element["entity"]["children"]:

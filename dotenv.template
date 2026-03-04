@@ -7,6 +7,8 @@ OPENAI_API_BASE="https://openai.com/v1"
 
 # Mediawiki instance base URL.
 MEDIAWIKI_URL="https://your.mediawiki/base/url"
+# (Optional) If the index was built with a different URL (like a temp one), specify it here to be replaced.
+# MEDIAWIKI_URL_OLD="https://your.mediawiki.old/base/url"
 # Comma separated list (general and others, see https://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces)
 MEDIAWIKI_NAMESPACES="0,4,12"
 MEDIAWIKI_EXCLUDED="categories:Category A, Category B;wikitext:Some regex to exclude"
