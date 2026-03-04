@@ -4,6 +4,9 @@
 """Simple MCP server example providing a few tools, resources and prompts."""
 
 import logging
+import os
+
+from urllib.parse import urlparse
 
 from fastmcp import FastMCP
 from langchain_core.prompts import (
@@ -52,6 +55,27 @@ async def retrieve(messages: list[Message]) -> dict[str, list[dict]]:
         context=server.context
     )
     logger.debug(f"Response: {response}")
+    # If we have a kb_url, let's use it to build the source links.
+    # This is useful when the index was built with a different URL (like a temp one).
+    kb_url = server.context.get("kb_url")
+
+    def get_source_url(source_url: str) -> str:
+        if kb_url:
+            # If we have a custom replacement URL (env var), use it.
+            old_url = os.getenv("MEDIAWIKI_URL_OLD")
+            if old_url and source_url.startswith(old_url):
+                return source_url.replace(old_url, kb_url)
+            else:
+                # Fallback: if they differ, try to replace the base part of the URL.
+                source_parsed = urlparse(source_url)
+                kb_parsed = urlparse(kb_url)
+                if source_parsed.netloc != kb_parsed.netloc:
+                    return source_parsed._replace(
+                        scheme=kb_parsed.scheme,
+                        netloc=kb_parsed.netloc
+                    ).geturl()
+        return source_url
+
     return {
         "vector_search": [
             {
@@ -60,7 +84,7 @@ async def retrieve(messages: list[Message]) -> dict[str, list[dict]]:
                 "page_id": doc["entity"]["page_id"],
                 "title": doc["entity"]["title"],
                 "text": doc["entity"]["text"],
-                "source": doc["entity"]["source"],
+                "source": get_source_url(doc["entity"]["source"]),
             } for doc in response["vector_search"]
         ],
     }
